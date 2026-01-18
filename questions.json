@@ -1,0 +1,260 @@
+{
+  "initial_question": {
+    "id": "christianity_knowledge",
+    "question": "Do you have knowledge of Christianity?",
+    "description": "This helps us personalize your learning journey and questions",
+    "options": [
+      {
+        "value": "yes_i_know",
+        "label": "Yes, I Know",
+        "description": "I have knowledge of Christianity and the Bible"
+      },
+      {
+        "value": "no_im_new",
+        "label": "No, I'm New",
+        "description": "I'm new to Christianity and want to learn"
+      }
+    ]
+  },
+  "flows": {
+    "no_im_new": {
+      "total_questions": 10,
+      "questions": [
+        {
+          "question_number": 1,
+          "progress": "10%",
+          "question": "How would you describe your current interest in spirituality or personal growth?",
+          "options": [
+            "Very interested",
+            "Somewhat interested",
+            "Curious but unsure",
+            "Not very interested"
+          ]
+        },
+        {
+          "question_number": 2,
+          "progress": "20%",
+          "question": "What has shaped your understanding of spirituality so far?",
+          "options": [
+            "Family or culture",
+            "Personal experiences",
+            "Books, media, or school",
+            "I haven't thought much about spirituality",
+            "other"
+          ]
+        },
+        {
+          "question_number": 3,
+          "progress": "30%",
+          "question": "Have you ever read any religious or philosophical texts before?",
+          "options": [
+            "Yes, regularly",
+            "Yes, a few times",
+            "I've skimmed some things",
+            "No, not really"
+          ]
+        },
+        {
+          "question_number": 4,
+          "progress": "40%",
+          "question": "How familiar are you with the message or teachings of Jesus?",
+          "options": [
+            "Very familiar",
+            "Somewhat familiar",
+            "Have heard of Jesus but not the teachings",
+            "Not familiar at all"
+          ]
+        },
+        {
+          "question_number": 5,
+          "progress": "50%",
+          "question": "What motivates you to explore spiritual learning right now?",
+          "options": [
+            "Personal growth",
+            "Life challenges",
+            "Curiosity",
+            "Seeking meaning or purpose",
+            "other"
+          ]
+        },
+        {
+          "question_number": 6,
+          "progress": "60%",
+          "question": "How comfortable are you with learning about new beliefs or worldviews?",
+          "options": [
+            "Very comfortable",
+            "Mostly comfortable",
+            "Somewhat hesitant",
+            "Not comfortable"
+          ]
+        },
+        {
+          "question_number": 7,
+          "progress": "70%",
+          "question": "Which learning style best fits you?",
+          "options": [
+            "Short simple lessons",
+            "Story-based learning",
+            "Deep explanations and context",
+            "Practical guidance for everyday life",
+            "A combination of these"
+          ]
+        },
+        {
+          "question_number": 8,
+          "progress": "80%",
+          "question": "Do you currently believe in a higher power or spiritual reality?",
+          "options": ["Yes", "Maybe / unsure", "Not really", "No"]
+        },
+        {
+          "question_number": 9,
+          "progress": "90%",
+          "question": "What type of spiritual questions do you think about most?",
+          "options": [
+            "Why am I here / purpose",
+            "What happens after life",
+            "How to live a good life",
+            "How to find peace and direction",
+            "i dont usually think about spiritual questions"
+          ]
+        },
+        {
+          "question_number": 10,
+          "progress": "100%",
+          "question": "How open are you to discovering what the Bible teaches even if it's new to you?",
+          "options": ["Very open", "Curious", "Unsure", "Not open right now"]
+        }
+      ]
+    },
+    "yes_i_know": {
+      "total_questions": 10,
+      "questions": [
+        {
+          "question_number": 1,
+          "progress": "10%",
+          "question": "How often do you currently read the Bible?",
+          "options": [
+            "Daily",
+            "Several times a week",
+            "Once a week",
+            "Rarely",
+            "almost never"
+          ]
+        },
+        {
+          "question_number": 2,
+          "progress": "20%",
+          "question": "When you read the Bible, how confident are you in understanding what you read?",
+          "options": [
+            "Very confident",
+            "Somewhat confident",
+            "Neutral",
+            "sometimes confused",
+            "often confused"
+          ]
+        },
+        {
+          "question_number": 3,
+          "progress": "30%",
+          "question": "Which best describes your prayer life?",
+          "options": [
+            "I pray throughout the day",
+            "I pray daily",
+            "I pray a few times a week",
+            "I rarely pray",
+            "i only pray in rmergencies"
+          ]
+        },
+        {
+          "question_number": 4,
+          "progress": "40%",
+          "question": "How would you describe your relationship with Jesus right now?",
+          "options": [
+            "Deep and intimate",
+            "Growing but inconsistent",
+            "Curious and seeking",
+            "Unsure",
+            "distant or disconnected"
+          ]
+        },
+        {
+          "question_number": 5,
+          "progress": "50%",
+          "question": "Which areas of spiritual growth do you want to strengthen most?",
+          "multiple_selection": true,
+          "options": [
+            "Understanding Scripture",
+            "Hearing God's voice",
+            "Prayer life",
+            "Overcoming sin/temptation",
+            "faithand trust in god",
+            "emotinal healing",
+            "purpose and calling",
+            "healthy relationships"
+          ]
+        },
+        {
+          "question_number": 6,
+          "progress": "60%",
+          "question": "How familiar are you with core Christian beliefs (salvation, grace, Holy Spirit, discipleship, etc.)?",
+          "options": [
+            "Very familiar",
+            "Somewhat familiar",
+            "A little familiar",
+            "not familiar at all"
+          ]
+        },
+        {
+          "question_number": 7,
+          "progress": "70%",
+          "question": "What style of learning helps you grow spiritually the most?",
+          "options": [
+            "Deep Bible study with context",
+            "Simple daily devotionals",
+            "Practical life application",
+            "vedio or story-based teaching",
+            "reflection questions and journaling",
+            "challenges and action steps"
+          ]
+        },
+        {
+          "question_number": 8,
+          "progress": "80%",
+          "question": "Do you currently belong to a church or spiritual community?",
+          "options": [
+            "Yes, actively involved",
+            "Yes, occasionally involved",
+            "Not currently"
+          ]
+        },
+        {
+          "question_number": 9,
+          "progress": "90%",
+          "question": "What areas of your life feel most in need of biblical guidance right now?",
+          "multiple_selection": true,
+          "options": [
+            "Career and purpose",
+            "Relationships and family",
+            "Financial stewardship",
+            "meantal and emotinal health",
+            "overcoming addictions or habits",
+            "spiritual warfare",
+            "service and ministry",
+            "identity and self-worth"
+          ]
+        },
+        {
+          "question_number": 10,
+          "progress": "100%",
+          "question": "What is your primary spiritual goal for the next 30 days?",
+          "options": [
+            "Establish consistent daily devotion time",
+            "Deepen my understanding of Scripture",
+            "Grow closer to God through prayer",
+            "apply biblical teachings to daily life"
+          ]
+        }
+      ]
+    }
+  }
+}
