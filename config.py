@@ -20,10 +20,23 @@ class Settings(BaseSettings):
     API_KEY: str = os.getenv("API_KEY", "")
 
     # PostgreSQL Database Configuration
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
-        "postgresql://postgres:post123@localhost:5432/logosreach"
-    )
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+
+    # Redis Configuration (for shared caching across workers)
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    CACHE_TTL: int = int(os.getenv("CACHE_TTL", "3600"))  # 1 hour default
+
+    # Rate Limiting Configuration
+    RATE_LIMIT_PER_MINUTE: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "60"))
+    RATE_LIMIT_PER_HOUR: int = int(os.getenv("RATE_LIMIT_PER_HOUR", "500"))
+
+    # AI API Retry Configuration
+    AI_MAX_RETRIES: int = int(os.getenv("AI_MAX_RETRIES", "3"))
+    AI_RETRY_DELAY: float = float(os.getenv("AI_RETRY_DELAY", "1.0"))
+
+    # Request Validation
+    MAX_ANSWER_LENGTH: int = int(os.getenv("MAX_ANSWER_LENGTH", "1000"))
+    MAX_ANSWERS_COUNT: int = int(os.getenv("MAX_ANSWERS_COUNT", "20"))
 
     # Available Pathways
     PATHWAYS: List[dict] = [

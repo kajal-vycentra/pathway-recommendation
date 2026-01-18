@@ -1,12 +1,13 @@
 import json
-import hashlib
+import logging
+import asyncio
 import httpx
-from typing import Dict, Optional, Tuple, List
+from typing import Dict, Optional, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from cachetools import TTLCache
 
 from config import settings
+from cache import RedisCache
 from models import (
     EntryType,
     PathwayRecommendation,
@@ -18,6 +19,8 @@ from db_models import (
     QuestionnaireResponse,
     PathwayRecommendationRecord,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class RecommendationService:
@@ -130,10 +133,6 @@ You MUST return ONLY valid JSON with this exact structure (no markdown, no expla
   "next_step_message": "Encouraging message to the user about starting their pathway"
 }"""
 
-    # Class-level cache for AI responses (shared across instances)
-    # TTL of 1 hour, max 1000 entries
-    _response_cache: TTLCache = TTLCache(maxsize=1000, ttl=3600)
-
     # Shared HTTP client for connection pooling
     _http_client: Optional[httpx.AsyncClient] = None
 
@@ -176,15 +175,6 @@ You MUST return ONLY valid JSON with this exact structure (no markdown, no expla
         if cls._http_client is not None:
             await cls._http_client.aclose()
             cls._http_client = None
-
-    def _generate_cache_key(self, entry_type: str, answers: Dict[str, str]) -> str:
-        """Generate cache key from answers for similar pattern matching."""
-        # Sort answers to ensure consistent hashing
-        sorted_answers = json.dumps(
-            {"entry_type": entry_type, "answers": dict(sorted(answers.items()))},
-            sort_keys=True
-        )
-        return hashlib.md5(sorted_answers.encode()).hexdigest()
 
     def _get_question_text(self, entry_type: str, question_key: str) -> str:
         """
@@ -326,8 +316,47 @@ Based on the above questions and answers, analyze this user's:
 Then recommend the BEST matching pathway from the provided list.
 Return your response in the exact JSON format specified."""
 
-    async def _call_ai_api(self, user_prompt: str) -> Dict:
-        """Call OpenRouter AI API with connection pooling."""
+    async def _call_ai_api_with_retry(self, user_prompt: str) -> Dict:
+        """
+        Call OpenRouter AI API with retry logic for resilience.
+
+        Retries on:
+        - Connection errors
+        - Timeout errors
+        - 5xx server errors
+        - 429 rate limit errors
+        """
+        last_exception = None
+
+        for attempt in range(settings.AI_MAX_RETRIES):
+            try:
+                return await self._call_ai_api_once(user_prompt)
+            except httpx.TimeoutException as e:
+                last_exception = e
+                logger.warning(f"AI API timeout (attempt {attempt + 1}/{settings.AI_MAX_RETRIES}): {e}")
+            except httpx.ConnectError as e:
+                last_exception = e
+                logger.warning(f"AI API connection error (attempt {attempt + 1}/{settings.AI_MAX_RETRIES}): {e}")
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code in (429, 500, 502, 503, 504):
+                    last_exception = e
+                    logger.warning(f"AI API error {e.response.status_code} (attempt {attempt + 1}/{settings.AI_MAX_RETRIES})")
+                else:
+                    raise  # Don't retry on 4xx errors (except 429)
+            except Exception as e:
+                last_exception = e
+                logger.error(f"Unexpected AI API error (attempt {attempt + 1}/{settings.AI_MAX_RETRIES}): {e}")
+
+            # Wait before retry with exponential backoff
+            if attempt < settings.AI_MAX_RETRIES - 1:
+                wait_time = settings.AI_RETRY_DELAY * (2 ** attempt)
+                logger.info(f"Retrying in {wait_time}s...")
+                await asyncio.sleep(wait_time)
+
+        raise Exception(f"AI API failed after {settings.AI_MAX_RETRIES} attempts: {last_exception}")
+
+    async def _call_ai_api_once(self, user_prompt: str) -> Dict:
+        """Single AI API call (used by retry wrapper)."""
         payload = {
             "model": self.model,
             "messages": [
@@ -367,8 +396,9 @@ Return your response in the exact JSON format specified."""
 
         Optimized for scalability:
         - Async database operations
-        - Response caching for similar patterns
+        - Redis caching shared across workers
         - Connection pooling for AI API calls
+        - Retry logic for AI API resilience
         - Sends BOTH questions AND answers to AI
 
         Args:
@@ -392,16 +422,20 @@ Return your response in the exact JSON format specified."""
             request.answers
         )
 
-        # 3. Check cache for similar answer patterns
-        cache_key = self._generate_cache_key(request.entry_type.value, request.answers)
-        recommendation_data = self._response_cache.get(cache_key)
+        # 3. Check Redis cache for similar answer patterns
+        cache_key = RedisCache.generate_cache_key(request.entry_type.value, request.answers)
+        recommendation_data = await RedisCache.get(cache_key)
 
         if recommendation_data is None:
-            # Cache miss - call AI API
+            # Cache miss - call AI API with retry logic
+            logger.info(f"Cache miss for key {cache_key[:16]}..., calling AI API")
             user_prompt = self._format_user_prompt(request)
-            recommendation_data = await self._call_ai_api(user_prompt)
-            # Store in cache
-            self._response_cache[cache_key] = recommendation_data
+            recommendation_data = await self._call_ai_api_with_retry(user_prompt)
+            # Store in Redis cache
+            await RedisCache.set(cache_key, recommendation_data)
+            logger.info(f"Cached response for key {cache_key[:16]}...")
+        else:
+            logger.info(f"Cache hit for key {cache_key[:16]}...")
 
         # 4. Create recommendation object
         recommendation = PathwayRecommendation(

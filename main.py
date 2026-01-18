@@ -1,12 +1,18 @@
 import json
-from fastapi import FastAPI, HTTPException, Depends
+import logging
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from config import settings
 from database import get_db, init_db, async_engine
 from auth import verify_api_key
+from cache import RedisCache
+from health import get_full_health_check
+from rate_limit import limiter, rate_limit_exceeded_handler, rate_limit_default, rate_limit_strict
 from models import (
     RecommendationRequest,
     RecommendationResponse,
@@ -15,29 +21,45 @@ from models import (
 )
 from services.recommendation_service import RecommendationService
 
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG if settings.DEBUG else logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler with proper startup/shutdown."""
     # Startup
-    print(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
+    logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
+
     if not settings.OPENROUTER_API_KEY:
-        print("WARNING: OPENROUTER_API_KEY not set!")
+        logger.warning("OPENROUTER_API_KEY not set!")
     if not settings.API_KEY:
-        print("WARNING: API_KEY not set! API will reject all requests.")
+        logger.warning("API_KEY not set! API will reject all requests.")
+    if not settings.DATABASE_URL:
+        logger.error("DATABASE_URL not set!")
 
     # Initialize database tables
-    print("Initializing database...")
+    logger.info("Initializing database...")
     await init_db()
-    print("Database initialized successfully!")
+    logger.info("Database initialized successfully!")
+
+    # Initialize Redis connection
+    logger.info("Initializing Redis cache...")
+    await RedisCache.get_client()
+    logger.info("Cache initialized!")
 
     yield
 
     # Shutdown - cleanup resources
-    print("Shutting down...")
+    logger.info("Shutting down...")
     await RecommendationService.close_http_client()
+    await RedisCache.close()
     await async_engine.dispose()
-    print("Cleanup complete!")
+    logger.info("Cleanup complete!")
 
 
 app = FastAPI(
@@ -47,13 +69,20 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
+# Add rate limiter to app state
+app.state.limiter = limiter
+
+# Add rate limit exceeded exception handler
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+
+# CORS middleware - Configure for production
+# TODO: Replace "*" with your actual frontend domains in production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Change to specific origins in production: ["https://yourdomain.com"]
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["X-API-Key", "Content-Type", "Authorization"],
 )
 
 # Initialize services
@@ -93,21 +122,36 @@ async def root():
 
 
 @app.get("/health")
-async def health_check():
-    """Health check endpoint (public)."""
+async def health_check_simple():
+    """Simple health check endpoint (public) - for load balancer probes."""
     return {
-        "status": "healthy",
-        "api_key_configured": bool(settings.API_KEY),
-        "openrouter_configured": bool(settings.OPENROUTER_API_KEY),
-        "database_configured": bool(settings.DATABASE_URL),
-        "cache_size": len(RecommendationService._response_cache)
+        "status": "ok",
+        "version": settings.APP_VERSION
     }
+
+
+@app.get("/health/detailed")
+async def health_check_detailed(db: AsyncSession = Depends(get_db)):
+    """
+    Detailed health check endpoint with dependency status (public).
+
+    Tests actual connectivity to:
+    - PostgreSQL database
+    - Redis cache
+    - OpenRouter AI API
+
+    Returns overall status and individual component health.
+    """
+    health_status = await get_full_health_check(db)
+    return health_status
 
 
 # ============== PROTECTED ENDPOINTS (Auth Required) ==============
 
 @app.get("/questions/{entry_type}")
+@rate_limit_default
 async def get_questions(
+    request: Request,
     entry_type: EntryType,
     api_key: str = Depends(verify_api_key)
 ):
@@ -142,7 +186,8 @@ async def get_questions(
 
 
 @app.get("/pathways")
-async def get_pathways(api_key: str = Depends(verify_api_key)):
+@rate_limit_default
+async def get_pathways(request: Request, api_key: str = Depends(verify_api_key)):
     """
     Get all available pathways.
 
@@ -154,8 +199,10 @@ async def get_pathways(api_key: str = Depends(verify_api_key)):
 
 
 @app.post("/recommend", response_model=RecommendationResponse)
+@rate_limit_strict
 async def recommend_pathway(
-    request: RecommendationRequest,
+    request: Request,
+    body: RecommendationRequest,
     db: AsyncSession = Depends(get_db),
     api_key: str = Depends(verify_api_key)
 ):
@@ -201,7 +248,7 @@ async def recommend_pathway(
     """
     try:
         recommendation, user_id, recommendation_id = await recommendation_service.get_recommendation(
-            request, db
+            body, db
         )
 
         return RecommendationResponse(
@@ -213,6 +260,7 @@ async def recommend_pathway(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.error(f"Recommendation error: {str(e)}")
         return RecommendationResponse(
             success=False,
             error=f"Failed to generate recommendation: {str(e)}"
@@ -220,7 +268,9 @@ async def recommend_pathway(
 
 
 @app.get("/users/{user_id}/history", response_model=UserHistoryResponse)
+@rate_limit_default
 async def get_user_history(
+    request: Request,
     user_id: str,
     db: AsyncSession = Depends(get_db),
     api_key: str = Depends(verify_api_key)
