@@ -1,11 +1,23 @@
 """
 Script to reset the database - drops all tables and recreates them.
 Run this once to fix the UUID/Integer mismatch issue.
+
+Usage:
+    python -m scripts.reset_db
+
+Or from the root directory:
+    python scripts/reset_db.py
 """
+import sys
+from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import asyncio
 from sqlalchemy import text
-from database import async_engine
-from db_models import Base
+from app.db.database import async_engine
+from app.db.models import Base
 
 
 async def reset_database():
@@ -29,7 +41,7 @@ async def reset_database():
         print("Tables created successfully!")
 
     await async_engine.dispose()
-    print("\nDatabase reset complete! You can now run: python main.py")
+    print("\nDatabase reset complete! You can now run: python run.py")
 
 
 if __name__ == "__main__":

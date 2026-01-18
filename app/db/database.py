@@ -2,12 +2,12 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine
 
-from config import settings
+from app.config import settings
 
 # Convert sync URL to async URL for asyncpg
 ASYNC_DATABASE_URL = settings.DATABASE_URL.replace(
     "postgresql://", "postgresql+asyncpg://"
-)
+) if settings.DATABASE_URL else ""
 
 # Async engine for production use (non-blocking)
 async_engine = create_async_engine(
@@ -18,7 +18,7 @@ async_engine = create_async_engine(
     pool_timeout=30,       # Wait up to 30s for connection
     pool_recycle=1800,     # Recycle connections every 30 minutes
     echo=settings.DEBUG,   # Log SQL in debug mode
-)
+) if ASYNC_DATABASE_URL else None
 
 # Async session factory
 AsyncSessionLocal = async_sessionmaker(
@@ -27,7 +27,7 @@ AsyncSessionLocal = async_sessionmaker(
     expire_on_commit=False,
     autocommit=False,
     autoflush=False,
-)
+) if async_engine else None
 
 # Sync engine for migrations and init only
 sync_engine = create_engine(
@@ -35,7 +35,7 @@ sync_engine = create_engine(
     pool_pre_ping=True,
     pool_size=5,
     max_overflow=10,
-)
+) if settings.DATABASE_URL else None
 
 # Base class for models
 Base = declarative_base()
@@ -52,12 +52,12 @@ async def get_db() -> AsyncSession:
 
 async def init_db():
     """Initialize database tables asynchronously."""
-    from db_models import Base
+    from app.db.models import Base
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
 
 def init_db_sync():
     """Initialize database tables synchronously (for startup)."""
-    from db_models import Base
+    from app.db.models import Base
     Base.metadata.create_all(bind=sync_engine)

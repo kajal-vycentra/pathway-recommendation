@@ -1,10 +1,13 @@
 import json
 import hashlib
+import logging
 from typing import Optional, Dict, Any
 import redis.asyncio as redis
 from cachetools import TTLCache
 
-from config import settings
+from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class RedisCache:
@@ -33,7 +36,7 @@ class RedisCache:
                 await cls._redis_client.ping()
                 cls._redis_available = True
             except Exception as e:
-                print(f"Redis connection failed, using fallback cache: {e}")
+                logger.warning(f"Redis connection failed, using fallback cache: {e}")
                 cls._redis_available = False
                 cls._redis_client = None
         return cls._redis_client
@@ -64,7 +67,7 @@ class RedisCache:
                 if value:
                     return json.loads(value)
         except Exception as e:
-            print(f"Redis get error, using fallback: {e}")
+            logger.warning(f"Redis get error, using fallback: {e}")
             cls._redis_available = False
 
         # Fallback to in-memory cache
@@ -85,7 +88,7 @@ class RedisCache:
                 await client.setex(key, ttl, json_value)
                 return True
         except Exception as e:
-            print(f"Redis set error: {e}")
+            logger.warning(f"Redis set error: {e}")
             cls._redis_available = False
 
         return False

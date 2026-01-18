@@ -4,7 +4,7 @@ from sqlalchemy import Column, String, Float, DateTime, Text, ForeignKey, JSON, 
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from database import Base
+from app.db.database import Base
 
 
 class User(Base):
@@ -72,5 +72,3 @@ class PathwayRecommendationRecord(Base):
         Index('ix_recommendations_user_created', 'user_id', 'created_at'),
         Index('ix_recommendations_pathway_created', 'recommended_pathway', 'created_at'),
     )
-
-

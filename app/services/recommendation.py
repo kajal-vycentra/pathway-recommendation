@@ -1,26 +1,30 @@
 import json
 import logging
 import asyncio
+from pathlib import Path
 import httpx
 from typing import Dict, Optional, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from config import settings
-from cache import RedisCache
-from models import (
+from app.config import settings
+from app.core.cache import RedisCache
+from app.schemas import (
     EntryType,
     PathwayRecommendation,
     DetectedProfile,
     RecommendationRequest,
 )
-from db_models import (
+from app.db.models import (
     User,
     QuestionnaireResponse,
     PathwayRecommendationRecord,
 )
 
 logger = logging.getLogger(__name__)
+
+# Base directory for data files
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class RecommendationService:
@@ -149,7 +153,8 @@ You MUST return ONLY valid JSON with this exact structure (no markdown, no expla
         """Load questions from JSON file (cached)."""
         if cls._questions_data is None:
             try:
-                with open("questions.json", "r", encoding="utf-8") as f:
+                questions_path = BASE_DIR / "data" / "questions.json"
+                with open(questions_path, "r", encoding="utf-8") as f:
                     cls._questions_data = json.load(f)
             except FileNotFoundError:
                 cls._questions_data = {"flows": {}}

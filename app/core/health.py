@@ -1,10 +1,11 @@
+import asyncio
 import httpx
 from typing import Dict, Any
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import settings
-from cache import RedisCache
+from app.config import settings
+from app.core.cache import RedisCache
 
 
 async def check_database(db: AsyncSession) -> Dict[str, Any]:
@@ -92,7 +93,6 @@ async def get_full_health_check(db: AsyncSession) -> Dict[str, Any]:
         Dict with overall status and individual component statuses.
     """
     # Run all checks concurrently
-    import asyncio
     db_check, redis_check, openrouter_check = await asyncio.gather(
         check_database(db),
         check_redis(),

@@ -101,7 +101,7 @@ class RecommendationRequest(BaseModel):
     def validate_answers(cls, v: Dict[str, str]) -> Dict[str, str]:
         """Validate answers dictionary."""
         # Import here to avoid circular import
-        from config import settings
+        from app.config import settings
 
         if not v:
             raise ValueError("answers cannot be empty")
