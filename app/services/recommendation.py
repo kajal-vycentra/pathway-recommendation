@@ -492,12 +492,38 @@ Return your response in the exact JSON format specified."""
 
             raise ValueError(f"Failed to parse AI response as JSON: {e}")
 
-    async def get_user_history(self, db: AsyncSession, external_user_id: str) -> list:
-        """Get user's recommendation history (async)."""
-        result = await db.execute(
-            select(User).where(User.external_user_id == external_user_id)
-        )
-        user = result.scalar_one_or_none()
+    async def get_user_history(self, db: AsyncSession, user_id: str) -> list:
+        """
+        Get user's recommendation history (async).
+
+        Args:
+            db: Async database session
+            user_id: Can be either the internal UUID or the external_user_id
+
+        Returns:
+            List of recommendation history records
+        """
+        import uuid as uuid_module
+
+        user = None
+
+        # First, try to find by internal UUID
+        try:
+            user_uuid = uuid_module.UUID(user_id)
+            result = await db.execute(
+                select(User).where(User.id == user_uuid)
+            )
+            user = result.scalar_one_or_none()
+        except (ValueError, AttributeError):
+            # Not a valid UUID, will try external_user_id next
+            pass
+
+        # If not found by UUID, try external_user_id
+        if not user:
+            result = await db.execute(
+                select(User).where(User.external_user_id == user_id)
+            )
+            user = result.scalar_one_or_none()
 
         if not user:
             return []
