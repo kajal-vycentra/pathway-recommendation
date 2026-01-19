@@ -563,14 +563,166 @@ STEP 8: RETURN RESPONSE
 
 ## 5. AI Processing Logic
 
+### The RELATE Framework
+
+Before recommending any pathway, the AI processes through the **RELATE Framework** - a compassionate, human-centered approach that ensures users feel seen, heard, and understood.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        THE RELATE FRAMEWORK                                  │
+│                  (Relationship-First Recommendation)                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    The AI acts as a compassionate spiritual companion, NOT a cold algorithm.
+    Before any recommendation, the AI internally processes through ALL stages:
+
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                                                                          │
+    │   R ─ RECOGNIZE                                                          │
+    │   ════════════════════════════════════════════════════════════════════   │
+    │   • Who is this person based on their answers?                           │
+    │   • What is their life situation right now?                              │
+    │   • Are they new to faith or experienced?                                │
+    │   • What context surrounds their spiritual journey?                      │
+    │                                                                          │
+    │   Example: "This person is a working mother struggling with anxiety,     │
+    │            new to exploring faith after a difficult season."             │
+    │                                                                          │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                                                                          │
+    │   E ─ EMPATHIZE                                                          │
+    │   ════════════════════════════════════════════════════════════════════   │
+    │   • What emotions are they experiencing?                                 │
+    │     (anxiety, grief, confusion, hope, fear, curiosity, pain)             │
+    │   • Put yourself in their shoes - feel what they're feeling              │
+    │   • Understand the weight of what they're carrying                       │
+    │   • No judgment, only compassion                                         │
+    │                                                                          │
+    │   Example: "I can sense the exhaustion and worry in their answers.       │
+    │            They're carrying a heavy burden and seeking relief."          │
+    │                                                                          │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                                                                          │
+    │   L ─ LISTEN                                                             │
+    │   ════════════════════════════════════════════════════════════════════   │
+    │   • What are they REALLY saying beneath the surface answers?             │
+    │   • What's the deeper need they may not have explicitly stated?          │
+    │   • Read between the lines with compassion                               │
+    │   • Hear the unspoken cries in their responses                           │
+    │                                                                          │
+    │   Example: "They said they want 'peace' but what they really need        │
+    │            is to know they're not alone and that God sees them."         │
+    │                                                                          │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                                                                          │
+    │   A ─ AFFIRM                                                             │
+    │   ════════════════════════════════════════════════════════════════════   │
+    │   • What courage did it take for them to answer honestly?                │
+    │   • What strengths do you see in them?                                   │
+    │   • Seeking help IS strength - acknowledge this                          │
+    │   • They are brave for taking this step                                  │
+    │                                                                          │
+    │   Example: "It takes real courage to admit you're struggling.            │
+    │            Their willingness to seek help shows inner strength."         │
+    │                                                                          │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                                                                          │
+    │   T ─ TRUST                                                              │
+    │   ════════════════════════════════════════════════════════════════════   │
+    │   • How can the response make them feel safe and understood?             │
+    │   • They need to know someone cares before receiving guidance            │
+    │   • Build connection through words                                       │
+    │   • Create a sense of safety and being seen                              │
+    │                                                                          │
+    │   Example: "The response should feel like a warm embrace,                │
+    │            letting them know they're not alone in this."                 │
+    │                                                                          │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                                                                          │
+    │   E ─ ENGAGE                                                             │
+    │   ════════════════════════════════════════════════════════════════════   │
+    │   • NOW and ONLY NOW, recommend the pathway                              │
+    │   • The recommendation should feel like advice from a caring friend      │
+    │   • Not a cold algorithm match - a thoughtful, personal suggestion       │
+    │   • Explain WHY this pathway fits THEIR unique journey                   │
+    │                                                                          │
+    │   Example: "Based on everything you've shared, I believe the             │
+    │            'Overcoming Anxiety' pathway will meet you right where        │
+    │            you are and walk with you toward the peace you're seeking."   │
+    │                                                                          │
+    └─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Crisis Detection (Highest Priority)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      ⚠️  CRISIS DETECTION  ⚠️                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    If ANY answer indicates:
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │  • Self-harm or suicidal thoughts                                        │
+    │    ("end my life", "no point", "want to die", "give up")                │
+    │  • Severe hopelessness or despair                                        │
+    │  • Immediate danger or abuse                                             │
+    │  • Expressions of complete hopelessness                                  │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │  IMMEDIATE RESPONSE:                                                     │
+    │  ════════════════════════════════════════════════════════════════════   │
+    │  • ALWAYS recommend "Crisis Support" pathway                             │
+    │  • next_step_message MUST include:                                       │
+    │    - Caring urgency                                                      │
+    │    - "You're not alone"                                                  │
+    │    - Help is available                                                   │
+    │    - They matter and are valued                                          │
+    │  • Be gentle but clear that help exists                                  │
+    └─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Response Style Guidelines
+
+| Aspect | Guideline |
+|--------|-----------|
+| **Tone** | Warm, human, deeply caring - like a wise friend |
+| **Reasoning** | Shows understanding of the PERSON, not just keywords |
+| **Next Step Message** | Feels like a warm hug in words - personal, encouraging |
+| **Avoid** | Being preachy, robotic, or generic |
+| **Include** | Acknowledgment of their specific situation and feelings |
+
 ### How AI Analyzes Responses
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                     AI DECISION MAKING PROCESS                               │
+│                    (After RELATE Framework Processing)                       │
 └─────────────────────────────────────────────────────────────────────────────┘
 
                         USER ANSWERS
+                             │
+                             ▼
+              ┌──────────────────────────────┐
+              │   RELATE FRAMEWORK APPLIED   │
+              │   (See above for details)    │
+              └──────────────────────────────┘
                              │
                              ▼
               ┌──────────────────────────────┐
